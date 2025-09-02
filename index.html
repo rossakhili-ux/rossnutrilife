@@ -152,77 +152,115 @@
 </div>
 
 <script>
-(function(){{
-  function $(s){{return document.querySelector(s)}};
-  function $$(s){{return Array.from(document.querySelectorAll(s))}};
-  function clamp(n,min,max){{return Math.min(Math.max(n,min),max)}};
-  function round1(n){{return Math.round(n*10)/10}};
+(function() {
+  function $(s) { return document.querySelector(s); }
+  function $$(s) { return Array.from(document.querySelectorAll(s)); }
+  function clamp(n,min,max) { return Math.min(Math.max(n,min),max); }
+  function round1(n) { return Math.round(n*10)/10; }
 
   let sex='male', goalMod=-0.10, goalName='Снижение веса −10%';
-  function toggleGroup(sel, attr, cb){{
-    $$(sel + ' .pill').forEach(p=>{{
-      p.addEventListener('click', ()=>{{
-        $$(sel + ' .pill').forEach(x=>x.classList.remove('active'));
+  function toggleGroup(sel, attr, cb) {
+    $$(sel + ' .pill').forEach(p => {
+      p.addEventListener('click', () => {
+        $$(sel + ' .pill').forEach(x => x.classList.remove('active'));
         p.classList.add('active');
         cb(p.getAttribute(attr), p);
-      }});
-    }});
-  }}
-  toggleGroup('#sexGroup','data-sex',(v)=>{{sex=v;}});
-  toggleGroup('#goalGroup','data-goal',(v, el)=>{{ goalMod=parseFloat(el.getAttribute('data-mod')); goalName=el.textContent.trim(); }});
+      });
+    });
+  }
+  toggleGroup('#sexGroup','data-sex',(v)=>{ sex=v; });
+  toggleGroup('#goalGroup','data-goal',(v, el)=>{ goalMod=parseFloat(el.getAttribute('data-mod')); goalName=el.textContent.trim(); });
 
   const age=$('#age'), height=$('#height'), weight=$('#weight'), activity=$('#activity');
-  const pSlider=$('#pPerKg'), fSlider=$('#fPerKg'), pRuleEl=$('#pRule'), fRuleEl=$('#fRule');
-  pSlider.addEventListener('input', ()=>{{pRuleEl.textContent=(+pSlider.value).toFixed(1);}});
-  fSlider.addEventListener('input', ()=>{{fRuleEl.textContent=(+fSlider.value).toFixed(2);}});
+  const pSlider=$('#pPerKg'), fSlider=$('#fPerKg');
+  const pRuleEl=$('#pRule'), fRuleEl=$('#fRule');
+  pSlider.addEventListener('input', ()=>{ pRuleEl.textContent=(+pSlider.value).toFixed(1); });
+  fSlider.addEventListener('input', ()=>{ fRuleEl.textContent=(+fSlider.value).toFixed(2); });
 
-  $('#resetBtn').addEventListener('click', ()=>{{ sex='male'; $$('#sexGroup .pill').forEach((x,i)=>x.classList.toggle('active', i===0)); age.value=30;height.value=175;weight.value=70;activity.value="1.55"; $$('#goalGroup .pill').forEach((x,i)=>x.classList.toggle('active', i===1)); goalMod=-0.10;goalName='Снижение веса −10%'; pSlider.value=1.8;fSlider.value=0.9;$('#pRule').textContent='1.8';$('#fRule').textContent='0.90'; $('#results').style.display='none'; $('#mealsCard').style.display='none'; $('#getMealsBtn').style.display='none'; window.scrollTo({{top:0,behavior:'smooth'}}); }});
+  $('#resetBtn').addEventListener('click', ()=> {
+    sex='male';
+    $$('#sexGroup .pill').forEach((x,i)=>x.classList.toggle('active', i===0));
+    age.value=30; height.value=175; weight.value=70; activity.value="1.55";
+    $$('#goalGroup .pill').forEach((x,i)=>x.classList.toggle('active', i===1));
+    goalMod=-0.10; goalName='Снижение веса −10%';
+    pSlider.value=1.8; fSlider.value=0.9; pRuleEl.textContent='1.8'; fRuleEl.textContent='0.90';
+    $('#results').style.display='none';
+    $('#mealsCard').style.display='none';
+    $('#getMealsBtn').style.display='none';
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
 
-  function drawPie(canvas, values, colors, labels){{
+  function drawPie(canvas, values, colors, labels) {
     const ctx=canvas.getContext('2d');
     const total=values.reduce((a,b)=>a+b,0) || 1;
     ctx.clearRect(0,0,canvas.width,canvas.height);
     const cx=canvas.width/2, cy=canvas.height/2, r=Math.min(cx,cy)-10;
     let start=-Math.PI/2;
-    for(let i=0;i<values.length;i++){{ const slice=(values[i]/total)*Math.PI*2; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,r,start,start+slice,false); ctx.closePath(); ctx.fillStyle=colors[i]; ctx.fill(); start+=slice; }}
+    for(let i=0;i<values.length;i++) {
+      const slice=(values[i]/total)*Math.PI*2;
+      ctx.beginPath(); ctx.moveTo(cx,cy);
+      ctx.arc(cx,cy,r,start,start+slice,false);
+      ctx.closePath(); ctx.fillStyle=colors[i]; ctx.fill();
+      start+=slice;
+    }
     ctx.beginPath(); ctx.arc(cx,cy,r*0.55,0,Math.PI*2); ctx.fillStyle='#ffffff'; ctx.fill();
     ctx.fillStyle='#111'; ctx.font='bold 14px system-ui,-apple-system,Segoe UI,Roboto,Arial'; ctx.textAlign='center'; ctx.textBaseline='middle';
     ctx.fillText(labels.join(' / '), cx, cy);
-  }}
+  }
 
-  const DB = {{
+  // База продуктов
+  const DB = {
     protein: [
-      {{name:'яйца', grams:120, kcal:170, p:14, f:12, c:1}},
-      {{name:'творог 5%', grams:200, kcal:220, p:30, f:10, c:5}},
-      {{name:'греческий йогурт 2%', grams:200, kcal:150, p:18, f:4, c:10}},
-      {{name:'индейка/куриная грудка', grams:100, kcal:110, p:23, f:2, c:0}}
+      {name:'яйца', grams:120, kcal:170, p:14, f:12, c:1},
+      {name:'творог 5%', grams:200, kcal:220, p:30, f:10, c:5},
+      {name:'греческий йогурт 2%', grams:200, kcal:150, p:18, f:4, c:10},
+      {name:'индейка/куриная грудка', grams:100, kcal:110, p:23, f:2, c:0}
     ],
     carbs: [
-      {{name:'овсянка (сухая)', grams:60, kcal:225, p:8, f:4, c:38}},
-      {{name:'гречка (сухая)', grams:60, kcal:210, p:6, f:2, c:42}},
-      {{name:'банан', grams:120, kcal:105, p:1, f:0, c:27}},
-      {{name:'ц/з тост', grams:50, kcal:120, p:5, f:2, c:22}},
-      {{name:'ягоды', grams:100, kcal:50, p:1, f:0, c:12}}
+      {name:'овсянка (сухая)', grams:60, kcal:225, p:8, f:4, c:38},
+      {name:'гречка (сухая)', grams:60, kcal:210, p:6, f:2, c:42},
+      {name:'банан', grams:120, kcal:105, p:1, f:0, c:27},
+      {name:'ц/з тост', grams:50, kcal:120, p:5, f:2, c:22},
+      {name:'ягоды', grams:100, kcal:50, p:1, f:0, c:12}
     ],
     fats: [
-      {{name:'авокадо', grams:70, kcal:120, p:1, f:11, c:6}},
-      {{name:'арахисовая паста', grams:20, kcal:120, p:5, f:10, c:4}},
-      {{name:'орехи (микс)', grams:20, kcal:130, p:4, f:12, c:3}},
-      {{name:'льняное/чиа (семена)', grams:10, kcal:50, p:2, f:4, c:2}}
+      {name:'авокадо', grams:70, kcal:120, p:1, f:11, c:6},
+      {name:'арахисовая паста', grams:20, kcal:120, p:5, f:10, c:4},
+      {name:'орехи (микс)', grams:20, kcal:130, p:4, f:12, c:3},
+      {name:'льняное/чиа (семена)', grams:10, kcal:50, p:2, f:4, c:2}
     ]
-  }};
+  };
 
-  function perGram(item){{ return {{ kcal: item.kcal / item.grams, p: item.p / item.grams, f: item.f / item.grams, c: item.c / item.grams }}; }}
-  function increaseGrams(list, idx, extra){{ const it = list[idx]; const pg = perGram(it); it.grams = Math.round((it.grams + extra)*10)/10; it.kcal = Math.round((it.kcal + pg.kcal*extra)); it.p = Math.round((it.p + pg.p*extra)); it.f = Math.round((it.f + pg.f*extra)); it.c = Math.round((it.c + pg.c*extra)); }}
+  // сервис: линейное масштабирование ингредиента
+  function perGram(item) {
+    return {
+      kcal: item.kcal / item.grams,
+      p: item.p / item.grams,
+      f: item.f / item.grams,
+      c: item.c / item.grams
+    };
+  }
+  function increaseGrams(list, idx, extra) {
+    const it = list[idx];
+    const pg = perGram(it);
+    it.grams = Math.round((it.grams + extra)*10)/10;
+    it.kcal = Math.round((it.kcal + pg.kcal*extra));
+    it.p = Math.round((it.p + pg.p*extra));
+    it.f = Math.round((it.f + pg.f*extra));
+    it.c = Math.round((it.c + pg.c*extra));
+  }
 
-  function sum(items){{ return items.reduce((acc,x)=>{{ acc.kcal+=x.kcal; acc.p+=x.p; acc.f+=x.f; acc.c+=x.c; return acc; }}, {{kcal:0,p:0,f:0,c:0}}); }}
+  function sum(items) {
+    return items.reduce((acc,x)=>{ acc.kcal+=x.kcal; acc.p+=x.p; acc.f+=x.f; acc.c+=x.c; return acc; }, {kcal:0,p:0,f:0,c:0});
+  }
 
-  function generateBreakfasts(goalKcal, pGrDay, fGrDay, cGrDay){{
+  function generateBreakfasts(goalKcal, pGrDay, fGrDay, cGrDay) {
     const targetKcal = goalKcal * 0.25;
     const targetP = pGrDay * 0.25;
     const targetF = fGrDay * 0.25;
     const targetC = cGrDay * 0.25;
 
+    // стартовые варианты (без дублей)
     const picks = [];
     let b1 = [structuredClone(DB.carbs[0]), structuredClone(DB.protein[2]), structuredClone(DB.fats[3]), structuredClone(DB.carbs[4])];
     let b2 = [structuredClone(DB.protein[1]), structuredClone(DB.protein[3]), structuredClone(DB.carbs[3])];
@@ -230,51 +268,70 @@
     let b4 = [structuredClone(DB.carbs[1]), structuredClone(DB.protein[0]), structuredClone(DB.fats[0])];
     picks.push(b1,b2,b3,b4);
 
-    function firstIndexBy(list, pool){{ for(let i=0;i<list.length;i++){{ if(pool.some(p=>p.name===list[i].name)) return i; }} return -1; }}
+    function firstIndexBy(list, pool) {
+      for(let i=0;i<list.length;i++) { if(pool.some(p=>p.name===list[i].name)) return i; }
+      return -1;
+    }
 
-    function tuneNoDuplicates(list){{
+    function tuneNoDuplicates(list) {
       let s = sum(list);
       let guard = 0;
-      while(s.kcal < targetKcal*0.9 && guard < 12){{
+      while(s.kcal < targetKcal*0.9 && guard < 12) {
         const needP = Math.max(0, targetP - s.p);
         const needC = Math.max(0, targetC - s.c);
         const needF = Math.max(0, targetF - s.f);
 
-        if(needP >= needC && needP >= needF){{
+        if(needP >= needC && needP >= needF) {
           const idx = firstIndexBy(list, DB.protein);
           if(idx>=0) increaseGrams(list, idx, Math.max(15, list[idx].grams*0.15));
           else list.push(structuredClone(DB.protein[2]));
-        }} else if(needC >= needP && needC >= needF){{
+        } else if(needC >= needP && needC >= needF) {
           const idx = firstIndexBy(list, DB.carbs);
           if(idx>=0) increaseGrams(list, idx, Math.max(10, list[idx].grams*0.2));
           else list.push(structuredClone(DB.carbs[3]));
-        }} else {{
+        } else {
           const idx = firstIndexBy(list, DB.fats);
           if(idx>=0) increaseGrams(list, idx, Math.max(5, list[idx].grams*0.25));
           else list.push(structuredClone(DB.fats[2]));
-        }}
+        }
         s = sum(list);
         guard++;
-      }}
+      }
       return list;
-    }}
+    }
 
     const tuned = picks.map(tuneNoDuplicates);
-    const meals = tuned.map((list,idx)=>{{ const s = sum(list); const title = ['Баланс','Высокобелковый','Быстрый','Сытный'][idx] || 'Вариант'; return {{ title, items: list.map(x=>`${{x.name}} — ${{x.grams}} г`), kcal: Math.round(s.kcal), p: Math.round(s.p), f: Math.round(s.f), c: Math.round(s.c) }}; }});
+    const meals = tuned.map((list,idx)=>{
+      const s = sum(list);
+      const title = ['Баланс','Высокобелковый','Быстрый','Сытный'][idx] || 'Вариант';
+      return { title, items: list.map(x=>`${x.name} — ${x.grams} г`), kcal: Math.round(s.kcal), p: Math.round(s.p), f: Math.round(s.f), c: Math.round(s.c) };
+    });
 
-    const note = `Цель завтрака ≈ ${{Math.round(targetKcal)}} ккал (${{Math.round(targetP)}} г белка, ${{Math.round(targetF)}} г жиров, ${{Math.round(targetC)}} г углеводов).`;
-    return {{meals, note}};
-  }}
+    const note = `Цель завтрака ≈ ${Math.round(targetKcal)} ккал (${Math.round(targetP)} г белка, ${Math.round(targetF)} г жиров, ${Math.round(targetC)} г углеводов).`;
+    return {meals, note};
+  }
 
-  function renderMeals(payload){{ const wrap = document.getElementById('mealsWrap'); wrap.innerHTML = ''; payload.meals.forEach(m=>{{ const div = document.createElement('div'); div.className = 'meal'; div.innerHTML = `
-        <h4>${{m.title}}</h4>
-        <ul>${{m.items.map(it=>`<li>${{it}}</li>`).join('')}}</ul>
-        <div class="meta">≈ ${{m.kcal}} ккал • Б ${{m.p}} г / Ж ${{m.f}} г / У ${{m.c}} г</div>
-      `; wrap.appendChild(div); }}); document.getElementById('mealsNote').textContent = payload.note; document.getElementById('printMealsContent').innerHTML = wrap.innerHTML.replaceAll('class="meal"','class="meal" style="margin-bottom:8px"'); document.getElementById('mealsCard').style.display = 'block'; }}
+  function renderMeals(payload) {
+    const wrap = document.getElementById('mealsWrap');
+    wrap.innerHTML = '';
+    payload.meals.forEach(m=>{
+      const div = document.createElement('div');
+      div.className = 'meal';
+      div.innerHTML = `
+        <h4>${m.title}</h4>
+        <ul>${m.items.map(it=>`<li>${it}</li>`).join('')}</ul>
+        <div class="meta">≈ ${m.kcal} ккал • Б ${m.p} г / Ж ${m.f} г / У ${m.c} г</div>
+      `;
+      wrap.appendChild(div);
+    });
+    document.getElementById('mealsNote').textContent = payload.note;
+    document.getElementById('printMealsContent').innerHTML = wrap.innerHTML.replaceAll('class="meal"','class="meal" style="margin-bottom:8px"');
+    document.getElementById('mealsCard').style.display = 'block';
+  }
 
   let lastCalc = null;
 
-  function compute(){{
+  function compute() {
     const a=clamp(parseFloat(document.getElementById('age').value)||0,10,100);
     const h=clamp(parseFloat(document.getElementById('height').value)||0,120,230);
     const w=clamp(parseFloat(document.getElementById('weight').value)||0,30,250);
@@ -307,24 +364,30 @@
     document.getElementById('pKcal').textContent = Math.round(pKcal);
     document.getElementById('fKcal').textContent = Math.round(fKcal);
     document.getElementById('cKcal').textContent = Math.round(cKcal);
-    document.getElementById('macroRatio').textContent = `${{pGr.toFixed(1)}}г / ${{fGr.toFixed(1)}}г / ${{cGr.toFixed(1)}}г`;
-    document.getElementById('macroPct').textContent = `${{round1(pPct)}}% / ${{round1(fPct)}}% / ${{round1(cPct)}}%`;
+    document.getElementById('macroRatio').textContent = `${pGr.toFixed(1)}г / ${fGr.toFixed(1)}г / ${cGr.toFixed(1)}г`;
+    document.getElementById('macroPct').textContent = `${round1(pPct)}% / ${round1(fPct)}% / ${round1(cPct)}%`;
     document.getElementById('results').style.display='block';
 
     const canvas=document.getElementById('macroPie');
     drawPie(canvas,[pPct,fPct,cPct],['#0a3811','#6b6b6b','#9bbf9f'],[Math.round(pPct)+'%',Math.round(fPct)+'%',Math.round(cPct)+'%']);
 
-    lastCalc = {{goalKcal, pGr, fGr, cGr}};
+    lastCalc = {goalKcal, pGr, fGr, cGr};
     document.getElementById('getMealsBtn').style.display = 'inline-block';
     document.getElementById('mealsCard').style.display = 'none';
-  }}
+  }
 
   document.getElementById('calcBtn').addEventListener('click', compute);
-  document.getElementById('getMealsBtn').addEventListener('click', function(){{ if(!lastCalc) return; const payload = generateBreakfasts(lastCalc.goalKcal, lastCalc.pGr, lastCalc.fGr, lastCalc.cGr); renderMeals(payload); document.getElementById('mealsCard').scrollIntoView({{behavior:'smooth', block:'start'}}); }});
-  document.getElementById('pdfMealsBtn').addEventListener('click', ()=>{{ window.print(); }});
+  document.getElementById('getMealsBtn').addEventListener('click', function() {
+    if(!lastCalc) return;
+    const payload = generateBreakfasts(lastCalc.goalKcal, lastCalc.pGr, lastCalc.fGr, lastCalc.cGr);
+    renderMeals(payload);
+    document.getElementById('mealsCard').scrollIntoView({behavior:'smooth', block:'start'});
+  });
+  document.getElementById('pdfMealsBtn').addEventListener('click', ()=> { window.print(); });
 
+  // авто-расчет при загрузке
   compute();
-}})();
+})();
 </script>
 </body>
 </html>
