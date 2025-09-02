@@ -231,6 +231,9 @@
     ]
   };
 
+  // копирование объекта без structuredClone
+  function clone(item) { return { name: item.name, grams: item.grams, kcal: item.kcal, p: item.p, f: item.f, c: item.c }; }
+
   // сервис: линейное масштабирование ингредиента
   function perGram(item) {
     return {
@@ -262,10 +265,10 @@
 
     // стартовые варианты (без дублей)
     const picks = [];
-    let b1 = [structuredClone(DB.carbs[0]), structuredClone(DB.protein[2]), structuredClone(DB.fats[3]), structuredClone(DB.carbs[4])];
-    let b2 = [structuredClone(DB.protein[1]), structuredClone(DB.protein[3]), structuredClone(DB.carbs[3])];
-    let b3 = [structuredClone(DB.carbs[2]), structuredClone(DB.protein[2]), structuredClone(DB.fats[1])];
-    let b4 = [structuredClone(DB.carbs[1]), structuredClone(DB.protein[0]), structuredClone(DB.fats[0])];
+    let b1 = [clone(DB.carbs[0]), clone(DB.protein[2]), clone(DB.fats[3]), clone(DB.carbs[4])];
+    let b2 = [clone(DB.protein[1]), clone(DB.protein[3]), clone(DB.carbs[3])];
+    let b3 = [clone(DB.carbs[2]), clone(DB.protein[2]), clone(DB.fats[1])];
+    let b4 = [clone(DB.carbs[1]), clone(DB.protein[0]), clone(DB.fats[0])];
     picks.push(b1,b2,b3,b4);
 
     function firstIndexBy(list, pool) {
@@ -284,15 +287,15 @@
         if(needP >= needC && needP >= needF) {
           const idx = firstIndexBy(list, DB.protein);
           if(idx>=0) increaseGrams(list, idx, Math.max(15, list[idx].grams*0.15));
-          else list.push(structuredClone(DB.protein[2]));
+          else list.push(clone(DB.protein[2]));
         } else if(needC >= needP && needC >= needF) {
           const idx = firstIndexBy(list, DB.carbs);
           if(idx>=0) increaseGrams(list, idx, Math.max(10, list[idx].grams*0.2));
-          else list.push(structuredClone(DB.carbs[3]));
+          else list.push(clone(DB.carbs[3]));
         } else {
           const idx = firstIndexBy(list, DB.fats);
           if(idx>=0) increaseGrams(list, idx, Math.max(5, list[idx].grams*0.25));
-          else list.push(structuredClone(DB.fats[2]));
+          else list.push(clone(DB.fats[2]));
         }
         s = sum(list);
         guard++;
@@ -325,7 +328,9 @@
       wrap.appendChild(div);
     });
     document.getElementById('mealsNote').textContent = payload.note;
-    document.getElementById('printMealsContent').innerHTML = wrap.innerHTML.replaceAll('class="meal"','class="meal" style="margin-bottom:8px"');
+    // заменяем replaceAll на безопасный regex
+    const tmp = wrap.innerHTML.replace(/class="meal"/g,'class="meal" style="margin-bottom:8px"');
+    document.getElementById('printMealsContent').innerHTML = tmp;
     document.getElementById('mealsCard').style.display = 'block';
   }
 
