@@ -15,7 +15,9 @@
     #content{padding:12px}
     @media print { header{display:none} #content{padding:0} }
   </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-YcsIPQ+0M4lYlQWc4QAyhCewe9nWl0sS6M1c3q8o0Qq6iYfF1J5Dk0l6k2wz3f1RzQm3m6kdfx+9r0lOPb1x3Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <!-- Надёжный вариант: рендерим страницу в изображения и собираем PDF вручную (без шрифтов) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNa5lKQxCqvQn7C5J8wq8o17mU9rPzY9wYJmF0gQe0e2Qf3f1oWwI0pYfT5hW2Y5bQv8y7x9o0H1Sx7s8H+Gxw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha512-YkqkqfM9Q2w3Qq8R8p7mO5YpW1GxqC8aF4Cw6m2xS9xD8Kz2b1xgQKkKQ5N3yQGx1oQm1m9x3iU9Xb9Z3b9QxA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
   <header>
@@ -49,7 +51,7 @@
         return html;
       }
     }
-    // Рендерим контент прямо на странице
+
     const raw = decodeFromHash();
     if(!raw){
       document.getElementById('content').innerHTML = '<div style="padding:16px">Не удалось прочитать данные для печати.</div>';
@@ -57,18 +59,64 @@
     }
     document.getElementById('content').innerHTML = extractBody(raw);
 
+    // 1) Кнопка печати (если поддерживается)
     function doPrint(){ setTimeout(function(){ try{ window.print(); }catch(e){} }, 150); }
-    function downloadPDF(){
+    document.getElementById('printBtn').addEventListener('click', doPrint);
+
+    // 2) Кнопка "Скачать PDF" — делаем PDF из картинок, шрифты не нужны
+    async function downloadPDF(){
       try{
         const el = document.getElementById('content');
-        const opt = { margin:[10,10,10,10], filename:'Ross_NutriLife_breakfasts.pdf', image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2,useCORS:true}, jsPDF:{unit:'mm',format:'a4',orientation:'portrait'} };
-        html2pdf().from(el).set(opt).save();
+        const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+        // Параметры A4 портрет
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const margin = 10;
+        const usableWidth = pageWidth - margin*2;
+        const usableHeight = pageHeight - margin*2;
+
+        // соотношение сторон изображения
+        const imgW = canvas.width;
+        const imgH = canvas.height;
+        const imgAspect = imgW / imgH;
+
+        // масштабируем по ширине
+        const renderWidth = usableWidth;
+        const renderHeight = renderWidth / imgAspect;
+
+        // если одна страница — просто рисуем
+        if (renderHeight <= usableHeight){
+          pdf.addImage(imgData, 'JPEG', margin, margin, renderWidth, renderHeight);
+        } else {
+          // разбиваем изображение на куски по высоте страницы
+          const pageCount = Math.ceil(renderHeight / usableHeight);
+          const sliceHeightPx = Math.floor(imgH / pageCount);
+          for (let i=0; i<pageCount; i++){
+            if (i>0) pdf.addPage();
+            const sliceCanvas = document.createElement('canvas');
+            sliceCanvas.width = imgW;
+            sliceCanvas.height = sliceHeightPx;
+            const ctx = sliceCanvas.getContext('2d');
+            // источник: часть исходного canvas
+            ctx.drawImage(canvas, 0, i*sliceHeightPx, imgW, sliceHeightPx, 0, 0, imgW, sliceHeightPx);
+            const sliceData = sliceCanvas.toDataURL('image/jpeg', 0.95);
+            const sliceHeightMm = (sliceCanvas.height / imgW) * renderWidth; // пропорциональная высота
+            pdf.addImage(sliceData, 'JPEG', margin, margin, renderWidth, sliceHeightMm);
+          }
+        }
+
+        pdf.save('Ross_NutriLife_breakfasts.pdf');
       }catch(e){
+        console.error(e);
         alert('Не удалось сформировать PDF автоматически. Попробуйте «Печать» и сохранение в PDF.');
       }
     }
-    document.getElementById('printBtn').addEventListener('click', doPrint);
     document.getElementById('pdfBtn').addEventListener('click', downloadPDF);
+
     // Попытка автопечати
     window.addEventListener('load', function(){ setTimeout(doPrint, 300); }, { once:true });
   })();
