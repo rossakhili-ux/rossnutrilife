@@ -484,15 +484,28 @@
   async function printMeals(){
     const html = buildPrintHTML();
 
+    // Ветвь для Telegram WebApp — открываем data: ссылку во внешнем браузере
     if (isTelegramWebApp()){
       try{
-        const blob = new Blob([html], {type:'text/html'});
-        const url = URL.createObjectURL(blob);
+        const b64 = btoa(unescape(encodeURIComponent(html)));
+        const url = 'data:text/html;base64,' + b64;
         if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openLink){
           window.Telegram.WebApp.openLink(url);
         } else {
           window.location.href = url;
         }
+        return;
+      }catch(e){
+        // если не получилось — падаем в фолбэки ниже
+      }
+    }
+
+    // Обычные браузеры
+    try{ await tryIframePrint(html); return; }catch(_){}
+    try{ await tryWindowPrint(html); return; }catch(_){}
+    downloadAsHTML(html);
+    alert('Печать/скачивание заблокированы. Сохранила файл — открой во внешнем браузере и распечатай.');
+  }
         setTimeout(()=>URL.revokeObjectURL(url), 60000);
         return;
       }catch(e){ /* упали в фолбэки */ }
