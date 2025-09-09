@@ -7,7 +7,7 @@
 <style>
   :root { --green:#0a3811; --gray:#e9e9e9; --text:#111; --white:#e9e9e9; }
   * { box-sizing:border-box }
-  html,body { margin:0; padding:0; background:var(--white); color:#111; font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif }
+  html,body { margin:0; padding:0; background:var(--white); color:#111; font:16px/1.5 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif }
   .wrap { max-width:980px; margin:28px auto; padding:0 16px }
   header { display:flex; align-items:center; gap:16px; margin-bottom:20px }
   .brand small { color:#555 }
@@ -400,7 +400,7 @@
     document.getElementById('mealsCard').style.display = 'none';
   }
 
-  // анимация «думаю»
+  // Анимация "думаю"
   function startCalc(){
     const overlay = document.getElementById('thinking');
     const calcBtn = document.getElementById('calcBtn');
@@ -414,9 +414,10 @@
   document.getElementById('calcBtn').addEventListener('click', startCalc);
   document.getElementById('getMealsBtn').addEventListener('click', function(){ if(!lastCalc) return; const payload = generateBreakfasts(lastCalc.goalKcal, lastCalc.pGr, lastCalc.fGr, lastCalc.cGr); renderMeals(payload); document.getElementById('mealsCard').scrollIntoView({behavior:'smooth', block:'start'}); });
 
-  // ===== Экспорт завтраков (печать/сохранение) =====
+  // ===== Экспорт завтраков =====
   function buildPrintHTML(){
     const wrap = document.getElementById('printMeals');
+    // Без <script> внутри — используем onload для автопечати, чтобы не ломать основной <script>
     const html = `<!doctype html>
 <html lang="ru"><head>
 <meta charset="utf-8" />
@@ -430,91 +431,24 @@
   .caps{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#666}
   @page{ size:A4; margin:12mm }
 </style>
-</head><body>` + wrap.innerHTML + `
-<script>setTimeout(function(){ try{ window.print(); }catch(_ ){ } }, 300);<\/script>
+</head><body onload="setTimeout(function(){try{window.print()}catch(e){}},300)">
+` + wrap.innerHTML + `
 </body></html>`;
     return html;
   }
 
-  function tryIframePrint(html){
-    return new Promise((resolve,reject)=>{
-      try{
-        let iframe = document.getElementById('printFrame');
-        if(!iframe){
-          iframe = document.createElement('iframe');
-          iframe.id = 'printFrame';
-          iframe.style.position='fixed';
-          iframe.style.right='0'; iframe.style.bottom='0';
-          iframe.style.width='0'; iframe.style.height='0';
-          iframe.style.border='0'; iframe.style.visibility='hidden';
-          document.body.appendChild(iframe);
-        }
-        const win = iframe.contentWindow;
-        win.document.open(); win.document.write(html); win.document.close();
-        setTimeout(()=>{ try{ win.focus(); win.print(); resolve(true); }catch(e){ reject(e); } }, 250);
-      }catch(e){ reject(e); }
-    });
-  }
-
-  function tryWindowPrint(html){
-    return new Promise((resolve,reject)=>{
-      try{
-        const w = window.open('', '_blank');
-        if(!w){ reject(new Error('popup-blocked')); return; }
-        w.document.open(); w.document.write(html); w.document.close();
-        setTimeout(()=>{ try{ w.focus(); w.print(); resolve(true); }catch(e){ reject(e); } }, 250);
-      }catch(e){ reject(e); }
-    });
-  }
-
-  function downloadAsHTML(html, filename='zavtraki.html'){
-    const blob = new Blob([html], {type:'text/html'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = filename;
-    document.body.appendChild(a); a.click();
-    setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 800);
-  }
-
-  function isTelegramWebApp(){
-    return typeof window !== 'undefined' &&
-           typeof window.Telegram !== 'undefined' &&
-           window.Telegram.WebApp;
-  }
+  function tryIframePrint(html){ return new Promise((resolve,reject)=>{ try{ let iframe=document.getElementById('printFrame'); if(!iframe){ iframe=document.createElement('iframe'); iframe.id='printFrame'; iframe.style.position='fixed'; iframe.style.right='0'; iframe.style.bottom='0'; iframe.style.width='0'; iframe.style.height='0'; iframe.style.border='0'; iframe.style.visibility='hidden'; document.body.appendChild(iframe); } const win=iframe.contentWindow; win.document.open(); win.document.write(html); win.document.close(); setTimeout(()=>{ try{ win.focus(); win.print(); resolve(true); }catch(e){ reject(e); } }, 250); }catch(e){ reject(e); } }); }
+  function tryWindowPrint(html){ return new Promise((resolve,reject)=>{ try{ const w=window.open('','_blank'); if(!w){ reject(new Error('popup-blocked')); return; } w.document.open(); w.document.write(html); w.document.close(); setTimeout(()=>{ try{ w.focus(); w.print(); resolve(true); }catch(e){ reject(e); } }, 250); }catch(e){ reject(e); } }); }
+  function downloadAsHTML(html, filename='zavtraki.html'){ const blob=new Blob([html],{type:'text/html'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); },800); }
+  function isTelegramWebApp(){ return typeof window!=='undefined' && typeof window.Telegram!=='undefined' && window.Telegram.WebApp; }
 
   async function printMeals(){
     const html = buildPrintHTML();
-
-    // Ветвь для Telegram WebApp — открываем data: ссылку во внешнем браузере
-    if (isTelegramWebApp()){
-      try{
-        const b64 = btoa(unescape(encodeURIComponent(html)));
-        const url = 'data:text/html;base64,' + b64;
-        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openLink){
-          window.Telegram.WebApp.openLink(url);
-        } else {
-          window.location.href = url;
-        }
-        return;
-      }catch(e){
-        // если не получилось — падаем в фолбэки ниже
-      }
-    }
-
-    // Обычные браузеры
-    try{ await tryIframePrint(html); return; }catch(_){}
-    try{ await tryWindowPrint(html); return; }catch(_){}
-    downloadAsHTML(html);
-    alert('Печать/скачивание заблокированы. Сохранила файл — открой во внешнем браузере и распечатай.');
-  }
-        setTimeout(()=>URL.revokeObjectURL(url), 60000);
-        return;
-      }catch(e){ /* упали в фолбэки */ }
-    }
-
+    if (isTelegramWebApp()){ try{ const b64=btoa(unescape(encodeURIComponent(html))); const url='data:text/html;base64,'+b64; if(window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.openLink){ window.Telegram.WebApp.openLink(url); } else { window.location.href=url; } return; }catch(e){ } }
     try{ await tryIframePrint(html); return; }catch(_ ){}
     try{ await tryWindowPrint(html); return; }catch(_ ){}
     downloadAsHTML(html);
-    alert('В этом окне печать/скачивание заблокированы. Я сохранила файл — открой во внешнем браузере и распечатай.');
+    alert('Печать/скачивание заблокированы. Я сохранила файл — открой во внешнем браузере и распечатай.');
   }
 
   document.getElementById('pdfMealsBtn').addEventListener('click', printMeals);
