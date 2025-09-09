@@ -36,11 +36,8 @@
     .meal h4{ margin:0 0 6px 0; font-size:16px }
     .meal .meta{ font-size:13px; color:#444; margin-top:6px }
     .meal ul{ margin:0 0 4px 18px; padding:0 }
-
     @media print { body { background:#fff } .no-print { display:none !important } .only-print { display:block !important } .wrap { max-width:770px } header { margin-bottom:8px } }
     .only-print { display:none }
-
-    /* Help modal */
     .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.35);z-index:9999;padding:16px}
     .modal.show{display:flex}
     .modal .sheet{background:#fff;border-radius:14px;max-width:720px;width:100%;box-shadow:0 6px 24px rgba(0,0,0,.18);border:1px solid var(--bd)}
@@ -50,8 +47,6 @@
     .modal h4{margin:0 0 8px 0}
     .modal ul{margin:6px 0 0 18px}
     .modal p{margin:8px 0}
-
-    /* Overlay loader */
     .overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,.75);backdrop-filter:saturate(1.2) blur(2px);z-index:9998}
     .overlay.show{display:flex}
     .loader{display:flex;align-items:center;gap:10px;font-weight:600;color:var(--green)}
@@ -59,7 +54,7 @@
     .dots i{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);opacity:.3;animation:bounce 1s infinite}
     .dots i:nth-child(2){animation-delay:.15s}
     .dots i:nth-child(3){animation-delay:.3s}
-    @keyframes bounce{0%,80%,100%{transform:translateY(0);opacity:.3}40%{transform:translateY(-6px);opacity:1}
+    @keyframes bounce{0%,80%,100%{transform:translateY(0);opacity:.3}40%{transform:translateY(-6px);opacity:1}}
   </style>
 </head>
 <body>
@@ -72,7 +67,6 @@
     <button class="btn ghost" id="helpBtn" type="button" style="margin-left:auto">Инструкция</button>
   </header>
 
-  <!-- Overlay -->
   <div class="overlay" id="thinking">
     <div class="loader">
       <span>Считаю</span>
@@ -182,7 +176,6 @@
   <div class="foot">© Ross | NutriLife</div>
 </div>
 
-<!-- Инструкция -->
 <div class="modal" id="helpModal" aria-hidden="true" role="dialog">
   <div class="sheet">
     <header>
@@ -193,42 +186,33 @@
       <h4>Что здесь считается</h4>
       <p><b>BMR — основной обмен</b> — калории, которые тело тратит в покое.</p>
       <p><b>TDEE — суточная потребность</b> — это BMR × коэффициент активности. То есть калории, которые нужны вам за день с учётом движения.</p>
-
       <h4>Кнопки</h4>
       <ul>
         <li><b>Посчитать</b> — запускает расчёт по введённым данным.</li>
         <li><b>Сброс</b> — возвращает калькулятор в исходное состояние.</li>
-        <li><b>Получить примеры завтраков</b> — появляется после расчёта, показывает варианты завтрака на 25% от вашей калорийности.</li>
-        <li><b>Скачать PDF завтраков</b> — открывает печать или скачивание PDF.</li>
+        <li><b>Получить примеры завтраков</b> — после расчёта показывает варианты завтрака на 25% от вашей калорийности.</li>
+        <li><b>Скачать PDF завтраков</b> — открывает внешнюю страницу экспорта.</li>
         <li><b>Инструкция</b> — открывает это окно.</li>
       </ul>
-
       <h4>Бегунки</h4>
       <ul>
-        <li><b>Белок, г/кг</b> — сколько белка на 1 кг веса (обычно 1.6–2.2).</li>
-        <li><b>Жир, г/кг</b> — уровень жиров (0.8–1.0 на кг).</li>
+        <li><b>Белок, г/кг</b> — обычно 1.6–2.2.</li>
+        <li><b>Жир, г/кг</b> — 0.8–1.0.</li>
         <li><b>Углеводы</b> — считаются автоматически из оставшихся калорий.</li>
       </ul>
     </div>
   </div>
 </div>
 
-
 <script>
-/*! LZ-String (MIT) - compressToEncodedURIComponent/decompressFromEncodedURIComponent only */
-var LZString=function(){function o(o,r){if(!t[o]){t[o]={};for(var n=0;n<o.length;n++)t[o][o.charAt(n)]=n}return t[o][r]}var r=String.fromCharCode,n="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-$",t={},e={compressToEncodedURIComponent:function(o){return null==o?"":e._compress(o,6,function(o){return n.charAt(o)})},decompressFromEncodedURIComponent:function(r){return null==r?"":""==r?null:e._decompress(r.length,32,function(t){return o(n,r.charAt(t))})},_compress:function(o,n,t){if(null==o)return"";var e,i,u={},c={},p="",a="",s="",l=2,f=3,h=2,d=[],m=0,v=0;for(i=0;i<o.length;i+=1)if(p=o.charAt(i),Object.prototype.hasOwnProperty.call(u,p)||(u[p]=f++,c[p]=!0),a=s+p,Object.prototype.hasOwnProperty.call(u,a))s=a;else{if(Object.prototype.hasOwnProperty.call(c,s)){if(s.charCodeAt(0)<256){for(e=0;e<h;e++)m<<=1,v==n-1?(v=0,d.push(t(m)),m=0):v++;for(i=s.charCodeAt(0),e=0;e<8;e++)m=m<<1|1&i,v==n-1?(v=0,d.push(t(m)),m=0):v++,i>>=1}else{for(i=1,e=0;e<h;e++)m=m<<1|i,v==n-1?(v=0,d.push(t(m)),m=0):v++,i=0;for(i=s.charCodeAt(0),e=0;e<16;e++)m=m<<1|1&i,v==n-1?(v=0,d.push(t(m)),m=0):v++,i>>=1}l--,0==l&&(l=Math.pow(2,h),h++),delete c[s]}else for(i=u[s],e=0;e<h;e++)m=m<<1|1&i,v==n-1?(v=0,d.push(t(m)),m=0):v++,i>>=1;l--,0==l&&(l=Math.pow(2,h),h++),u[a]=f++,s=String(p)}if(""!==s){if(Object.prototype.hasOwnProperty.call(c,s)){if(s.charCodeAt(0)<256){for(e=0;e<h;e++)m<<=1,v==n-1?(v=0,d.push(t(m)),m=0):v++;for(i=s.charCodeAt(0),e=0;e<8;e++)m=m<<1|1&i,v==n-1?(v=0,d.push(t(m)),m=0):v++,i>>=1}else{for(i=1,e=0;e<h;e++)m=m<<1|i,v==n-1?(v=0,d.push(t(m)),m=0):v++,i=0;for(i=s.charCodeAt(0),e=0;e<16;e++)m=m<<1|1&i,v==n-1?(v=0,d.push(t(m)),m=0):v++,i>>=1}l--,0==l&&(l=Math.pow(2,h),h++),delete c[s]}else for(i=u[s],e=0;e<h;e++)m=m<<1|1&i,v==n-1?(v=0,d.push(t(m)),m=0):v++,i>>=1;l--,0==l&&(l=Math.pow(2,h),h++),m<<=1,v==n-1?(v=0,d.push(t(m)),m=0):v++}for(i=0;i<h;i++)m=m<<1,v==n-1?(v=0,d.push(t(m)),m=0):v++;return d.push(t(m|1)),d.join("")},_decompress:function(o,n,t){var e,i,u,c,p,a,s,l,f=[],h=4,d=4,m=3,v="",w=[],A={val:t(0),position:n,index:1};for(i=0;i<3;i+=1)f[i]=i;for(c=0,p=Math.pow(2,2),a=1;a!=p;)u=A.val&A.position,A.position>>=1,0==A.position&&(A.position=n,A.val=t(A.index++)),c|=(u>0?1:0)*a,a<<=1;switch(e=c){case 0:for(c=0,p=Math.pow(2,8),a=1;a!=p;)u=A.val&A.position,A.position>>=1,0==A.position&&(A.position=n,A.val=t(A.index++)),c|=(u>0?1:0)*a,a<<=1;i=r(c);break;case 1:for(c=0,p=Math.pow(2,16),a=1;a!=p;)u=A.val&A.position,A.position>>=1,0==A.position&&(A.position=n,A.val=t(A.index++)),c|=(u>0?1:0)*a,a<<=1;i=r(c);break;case 2:return""}for(f[3]=i,s=i,l=[],w.push(i);;){if(A.index>o)return"";for(c=0,p=Math.pow(2,m),a=1;a!=p;)u=A.val&A.position,A.position>>=1,0==A.position&&(A.position=n,A.val=t(A.index++)),c|=(u>0?1:0)*a,a<<=1;switch(i=c){case 0:for(c=0,p=Math.pow(2,8),a=1;a!=p;)u=A.val&A.position,A.position>>=1,0==A.position&&(A.position=n,A.val=t(A.index++)),c|=(u>0?1:0)*a,a<<=1;f[d++]=r(c),i=d-1,m--;break;case 1:for(c=0,p=Math.pow(2,16),a=1;a!=p;)u=A.val&A.position,A.position>>=1,0==A.position&&(A.position=n,A.val=t(A.index++)),c|=(u>0?1:0)*a,a<<=1;f[d++]=r(c),i=d-1,m--;break;case 2:return w.join("")}if(0==m&&(m=Math.pow(2,++h)),f[i])v=f[i];else{if(i!==d)return null;v=s+s.charAt(0)}w.push(v),f[d++]=s+v.charAt(0),m--,s=v,0==m&&(m=Math.pow(2,++h))}
-}};return e}();
-</script>
-
-<script>
-(function() {
-  function $(s) { return document.querySelector(s); }
-  function $$(s) { return Array.from(document.querySelectorAll(s)); }
-  function clamp(n,min,max) { return Math.min(Math.max(n,min),max); }
-  function round1(n) { return Math.round(n*10)/10; }
+(function(){
+  function $(s){ return document.querySelector(s); }
+  function $$(s){ return Array.from(document.querySelectorAll(s)); }
+  function clamp(n,min,max){ return Math.min(Math.max(n,min),max); }
+  function round1(n){ return Math.round(n*10)/10; }
 
   let sex='male', goalMod=-0.10, goalName='Снижение веса −10%';
-  function toggleGroup(sel, attr, cb) {
+  function toggleGroup(sel, attr, cb){
     $$(sel + ' .pill').forEach(p => {
       p.addEventListener('click', () => {
         $$(sel + ' .pill').forEach(x => x.classList.remove('active'));
@@ -259,13 +243,13 @@ var LZString=function(){function o(o,r){if(!t[o]){t[o]={};for(var n=0;n<o.length
     window.scrollTo({top:0,behavior:'smooth'});
   });
 
-  function drawPie(canvas, values, colors, labels) {
+  function drawPie(canvas, values, colors, labels){
     const ctx=canvas.getContext('2d');
     const total=values.reduce((a,b)=>a+b,0) || 1;
     ctx.clearRect(0,0,canvas.width,canvas.height);
     const cx=canvas.width/2, cy=canvas.height/2, r=Math.min(cx,cy)-10;
     let start=-Math.PI/2;
-    for(let i=0;i<values.length;i++) {
+    for(let i=0;i<values.length;i++){
       const slice=(values[i]/total)*Math.PI*2;
       ctx.beginPath(); ctx.moveTo(cx,cy);
       ctx.arc(cx,cy,r,start,start+slice,false);
@@ -277,7 +261,6 @@ var LZString=function(){function o(o,r){if(!t[o]){t[o]={};for(var n=0;n<o.length
     ctx.fillText(labels.join(' / '), cx, cy);
   }
 
-  // База продуктов
   const DB = {
     protein: [
       {name:'яйца', grams:120, kcal:170, p:14, f:12, c:1},
@@ -300,9 +283,9 @@ var LZString=function(){function o(o,r){if(!t[o]){t[o]={};for(var n=0;n<o.length
     ]
   };
 
-  function clone(item) { return { name: item.name, grams: item.grams, kcal: item.kcal, p: item.p, f: item.f, c: item.c }; }
-  function perGram(item) { return { kcal: item.kcal / item.grams, p: item.p / item.grams, f: item.f / item.grams, c: item.c / item.grams }; }
-  function increaseGrams(list, idx, extra) {
+  function clone(item){ return { name: item.name, grams: item.grams, kcal: item.kcal, p: item.p, f: item.f, c: item.c }; }
+  function perGram(item){ return { kcal: item.kcal / item.grams, p: item.p / item.grams, f: item.f / item.grams, c: item.c / item.grams }; }
+  function increaseGrams(list, idx, extra){
     const it = list[idx], pg = perGram(it);
     it.grams = Math.round((it.grams + extra)*10)/10;
     it.kcal = Math.round((it.kcal + pg.kcal*extra));
@@ -310,9 +293,9 @@ var LZString=function(){function o(o,r){if(!t[o]){t[o]={};for(var n=0;n<o.length
     it.f = Math.round((it.f + pg.f*extra));
     it.c = Math.round((it.c + pg.c*extra));
   }
-  function sum(items) { return items.reduce((a,x)=>{ a.kcal+=x.kcal; a.p+=x.p; a.f+=x.f; a.c+=x.c; return a; }, {kcal:0,p:0,f:0,c:0}); }
+  function sum(items){ return items.reduce((a,x)=>{ a.kcal+=x.kcal; a.p+=x.p; a.f+=x.f; a.c+=x.c; return a; }, {kcal:0,p:0,f:0,c:0}); }
 
-  function generateBreakfasts(goalKcal, pGrDay, fGrDay, cGrDay) {
+  function generateBreakfasts(goalKcal, pGrDay, fGrDay, cGrDay){
     const targetKcal = goalKcal * 0.25, targetP = pGrDay * 0.25, targetF = fGrDay * 0.25, targetC = cGrDay * 0.25;
     const picks = [];
     let b1 = [clone(DB.carbs[0]), clone(DB.protein[2]), clone(DB.fats[3]), clone(DB.carbs[4])];
@@ -321,16 +304,16 @@ var LZString=function(){function o(o,r){if(!t[o]){t[o]={};for(var n=0;n<o.length
     let b4 = [clone(DB.carbs[1]), clone(DB.protein[0]), clone(DB.fats[0])];
     picks.push(b1,b2,b3,b4);
 
-    function firstIndexBy(list, pool) { for(let i=0;i<list.length;i++) { if(pool.some(p=>p.name===list[i].name)) return i; } return -1; }
+    function firstIndexBy(list, pool){ for(let i=0;i<list.length;i++){ if(pool.some(p=>p.name===list[i].name)) return i; } return -1; }
 
-    function tuneNoDuplicates(list) {
+    function tuneNoDuplicates(list){
       let s = sum(list), guard = 0;
-      while(s.kcal < targetKcal*0.9 && guard < 12) {
+      while(s.kcal < targetKcal*0.9 && guard < 12){
         const needP = Math.max(0, targetP - s.p), needC = Math.max(0, targetC - s.c), needF = Math.max(0, targetF - s.f);
-        if(needP >= needC && needP >= needF) {
+        if(needP >= needC && needP >= needF){
           const idx = firstIndexBy(list, DB.protein);
           if(idx>=0) increaseGrams(list, idx, Math.max(15, list[idx].grams*0.15)); else list.push(clone(DB.protein[2]));
-        } else if(needC >= needP && needC >= needF) {
+        } else if(needC >= needP && needC >= needF){
           const idx = firstIndexBy(list, DB.carbs);
           if(idx>=0) increaseGrams(list, idx, Math.max(10, list[idx].grams*0.2)); else list.push(clone(DB.carbs[3]));
         } else {
@@ -349,7 +332,7 @@ var LZString=function(){function o(o,r){if(!t[o]){t[o]={};for(var n=0;n<o.length
     return {meals, note};
   }
 
-  function renderMeals(payload) {
+  function renderMeals(payload){
     const wrap = document.getElementById('mealsWrap');
     wrap.innerHTML = '';
     payload.meals.forEach(m=>{ const div = document.createElement('div'); div.className='meal';
@@ -363,7 +346,7 @@ var LZString=function(){function o(o,r){if(!t[o]){t[o]={};for(var n=0;n<o.length
 
   let lastCalc = null;
 
-  function compute() {
+  function compute(){
     const a=clamp(parseFloat(document.getElementById('age').value)||0,10,100);
     const h=clamp(parseFloat(document.getElementById('height').value)||0,120,230);
     const w=clamp(parseFloat(document.getElementById('weight').value)||0,30,250);
@@ -408,7 +391,6 @@ var LZString=function(){function o(o,r){if(!t[o]){t[o]={};for(var n=0;n<o.length
     document.getElementById('mealsCard').style.display = 'none';
   }
 
-  // Анимация "думаю"
   function startCalc(){
     const overlay = document.getElementById('thinking');
     const calcBtn = document.getElementById('calcBtn');
@@ -422,58 +404,52 @@ var LZString=function(){function o(o,r){if(!t[o]){t[o]={};for(var n=0;n<o.length
   document.getElementById('calcBtn').addEventListener('click', startCalc);
   document.getElementById('getMealsBtn').addEventListener('click', function(){ if(!lastCalc) return; const payload = generateBreakfasts(lastCalc.goalKcal, lastCalc.pGr, lastCalc.fGr, lastCalc.cGr); renderMeals(payload); document.getElementById('mealsCard').scrollIntoView({behavior:'smooth', block:'start'}); });
 
-  // ===== Экспорт завтраков =====
-  function buildPrintHTML(){
-    const wrap = document.getElementById('printMeals');
-    // Без <script> внутри — авто-печать через onload
-    const html = "<!doctype html>"+
-      '<html lang="ru"><head>'+
-      '<meta charset="utf-8" />'+
-      '<title>Завтраки — Ross | NutriLife</title>'+
-      '<meta name="viewport" content="width=device-width, initial-scale=1" />'+
-      '<style>'+
-      '  body{font:14px/1.45 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif;color:#111;margin:16px}'+
-      '  .logo{width:160px;height:auto}'+
-      '  .meal{border:1px solid #e6e6e6;border-radius:10px;padding:10px;margin-bottom:8px}'+
-      '  h2{margin:8px 0 12px 0}'+
-      '  .caps{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#666}'+
-      '  @page{ size:A4; margin:12mm }'+
-      '</style>'+
-      '</head><body onload="setTimeout(function(){try{window.print()}catch(e){},300)">'+
-      wrap.innerHTML+
-      '</body></html>';
-    return html;
+  // ===== Экспорт (короткий JSON -> base64url) =====
+  function base64urlEncode(str){
+    return btoa(unescape(encodeURIComponent(str))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  }
+  function buildExportJSON(){
+    const content = {
+      date: '2025-09-09',
+      note: document.getElementById('mealsNote').textContent || '',
+      meals: Array.from(document.querySelectorAll('#mealsWrap .meal')).map(card=>{
+        const title = (card.querySelector('h4')||{}).textContent || 'Завтрак';
+        const items = Array.from(card.querySelectorAll('li')).map(li=>li.textContent);
+        const meta = (card.querySelector('.meta')||{}).textContent || '';
+        return { title, items, meta };
+      })
+    };
+    return JSON.stringify(content);
+  }
+  function buildExportUrl(){
+    const json = buildExportJSON();
+    const enc = base64urlEncode(json);
+    const base = location.origin + location.pathname.replace(/[^/]*$/, '');
+    return base + 'export.html#' + enc;
   }
 
-  function isTelegramWebApp(){
-    return typeof window !== 'undefined' &&
-           typeof window.Telegram !== 'undefined' &&
-           window.Telegram.WebApp;
+  function openExternal(url){
+    try{
+      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openLink){
+        window.Telegram.WebApp.openLink(url);
+        return true;
+      }
+    }catch(e){}
+    try{ window.open(url, '_blank'); return true; }catch(e){}
+    try{ location.href = url; return true; }catch(e){}
+    return false;
   }
 
-  function buildExportUrlFromHTML(html){
-      try{
-        var compressed = LZString.compressToEncodedURIComponent(html);
-        var base = location.origin + location.pathname.replace(/[^/]*$/, '');
-        return base + 'export.html#' + compressed;
-      }catch(e){ return null; }
+  document.getElementById('pdfMealsBtn').addEventListener('click', function(){
+    if(!document.getElementById('mealsWrap').children.length){
+      alert('Сначала получите примеры завтраков — и затем экспортируйте.');
+      return;
     }
-  }
+    const url = buildExportUrl();
+    openExternal(url);
+  });
 
-  async function printMeals(){
-    const html = buildPrintHTML();
-    const exportUrl = buildExportUrlFromHTML(html);
-
-    if (isTelegramWebApp() && exportUrl){
-      try{ window.Telegram.WebApp.openLink(exportUrl); return; }catch(e){}
-    }
-    // В обычных браузерах — просто откроем export.html (стабильно и понятно)
-    if (exportUrl){ try{ window.open(exportUrl,'_blank'); return; }catch(_ ){ location.href = exportUrl; return; } }
-  }
-
-  document.getElementById('pdfMealsBtn').addEventListener('click', printMeals);
-
-  // ===== Инструкция (модалка) =====
+  // Инструкция
   (function(){
     const modal = document.getElementById('helpModal');
     const openBtn = document.getElementById('helpBtn');
@@ -486,7 +462,6 @@ var LZString=function(){function o(o,r){if(!t[o]){t[o]={};for(var n=0;n<o.length
     document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') close(); });
   })();
 
-  // авто-расчет при загрузке
   compute();
 })();
 </script>
