@@ -5,16 +5,32 @@
   <title>Экспорт завтраков — Ross | NutriLife</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    html,body{margin:0;padding:0;background:#fff}
-    .hint{position:fixed;left:12px;bottom:12px;font:13px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif;color:#555}
-    .hiddenFrame{position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden}
-    .btn{position:fixed;right:12px;bottom:12px;padding:10px 14px;border:1px solid #e6e6e6;border-radius:10px;background:#fafafa;cursor:pointer}
+    :root{--ink:#111;--muted:#666;--bd:#e6e6e6}
+    html,body{margin:0;padding:0;background:#fff;color:var(--ink);font:14px/1.45 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif}
+    header{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--bd);position:sticky;top:0;background:#fff;z-index:1}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
+    .btn{padding:10px 14px;border:1px solid var(--bd);border-radius:10px;background:#fafafa;cursor:pointer}
+    .btn.primary{background:#0a3811;color:#fff;border-color:#0a3811}
+    .hint{color:var(--muted);font-size:12px}
+    #content{padding:12px}
+    @media print { header{display:none} #content{padding:0} }
   </style>
+  <!-- Вариант прямой генерации PDF: html2pdf (включает jsPDF и html2canvas) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-YcsIPQ+0M4lYlQWc4QAyhCewe9nWl0sS6M1c3q8o0Qq6iYfF1J5Dk0l6k2wz3f1RzQm3m6kdfx+9r0lOPb1x3Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
-  <iframe id="out" class="hiddenFrame"></iframe>
-  <div class="hint">Если печать не открылась автоматически — нажмите «Печать»</div>
-  <button class="btn" id="printBtn" type="button">Печать</button>
+  <header>
+    <div>
+      <strong>Экспорт завтраков</strong>
+      <div class="hint">Если печать не сработает — скачайте PDF</div>
+    </div>
+    <div class="actions">
+      <button class="btn" id="printBtn" type="button">Печать</button>
+      <button class="btn primary" id="pdfBtn" type="button">Скачать PDF</button>
+    </div>
+  </header>
+
+  <div id="content"></div>
 
   <script>
   (function(){
@@ -25,29 +41,50 @@
         return atob(b64);
       }catch(e){ return null; }
     }
-    const html = decodeFromHash();
-    if(!html){
-      document.body.insertAdjacentHTML('beforeend','<div style="padding:16px">Не удалось прочитать данные для печати.</div>');
+    function extractBody(html){
+      try{
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        return doc.body.innerHTML || html;
+      }catch(e){
+        return html;
+      }
+    }
+    // 1) Рендерим контент прямо в этой странице (без iframe) — так html2pdf увидит стили
+    const raw = decodeFromHash();
+    if(!raw){
+      document.getElementById('content').innerHTML = '<div style="padding:16px">Не удалось прочитать данные для печати.</div>';
       return;
     }
-    const iframe = document.getElementById('out');
-    // Safari/Telegram-friendly: use srcdoc
-    try{
-      iframe.srcdoc = html;
-    }catch(_){
-      // fallback
-      const doc = iframe.contentWindow.document;
-      doc.open(); doc.write(html); doc.close();
-    }
+    document.getElementById('content').innerHTML = extractBody(raw);
+
+    // 2) Кнопки
     function doPrint(){
+      setTimeout(function(){ try{ window.print(); }catch(e){} }, 150);
+    }
+    function downloadPDF(){
       try{
-        const w = iframe.contentWindow;
-        setTimeout(function(){ try{ w.focus(); w.print(); }catch(e){} }, 200);
-      }catch(e){}
+        const el = document.getElementById('content');
+        // Параметры под A4, портрет
+        const opt = {
+          margin: [10, 10, 10, 10],
+          filename: 'Ross_NutriLife_breakfasts.pdf',
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().from(el).set(opt).save();
+      }catch(e){
+        alert('Не удалось сформировать PDF автоматически. Попробуйте «Печать» и сохранение в PDF.');
+      }
     }
     document.getElementById('printBtn').addEventListener('click', doPrint);
-    // auto print shortly after load
-    iframe.addEventListener('load', doPrint);
+    document.getElementById('pdfBtn').addEventListener('click', downloadPDF);
+
+    // 3) Пытаемся автоматически открыть печать один раз
+    window.addEventListener('load', function(){
+      setTimeout(doPrint, 300);
+    }, { once: true });
   })();
   </script>
 </body>
