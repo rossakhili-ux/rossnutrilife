@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <title>Экспорт завтраков — Ross | NutriLife</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    html,body{margin:0;padding:0;background:#fff}
+    .hint{position:fixed;left:12px;bottom:12px;font:13px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif;color:#555}
+    .hiddenFrame{position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden}
+    .btn{position:fixed;right:12px;bottom:12px;padding:10px 14px;border:1px solid #e6e6e6;border-radius:10px;background:#fafafa;cursor:pointer}
+  </style>
+</head>
+<body>
+  <iframe id="out" class="hiddenFrame"></iframe>
+  <div class="hint">Если печать не открылась автоматически — нажмите «Печать»</div>
+  <button class="btn" id="printBtn" type="button">Печать</button>
+
+  <script>
+  (function(){
+    function decodeFromHash(){
+      try{
+        const b64 = decodeURIComponent(location.hash.slice(1));
+        if(!b64) return null;
+        return atob(b64);
+      }catch(e){ return null; }
+    }
+    const html = decodeFromHash();
+    if(!html){
+      document.body.insertAdjacentHTML('beforeend','<div style="padding:16px">Не удалось прочитать данные для печати.</div>');
+      return;
+    }
+    const iframe = document.getElementById('out');
+    // Safari/Telegram-friendly: use srcdoc
+    try{
+      iframe.srcdoc = html;
+    }catch(_){
+      // fallback
+      const doc = iframe.contentWindow.document;
+      doc.open(); doc.write(html); doc.close();
+    }
+    function doPrint(){
+      try{
+        const w = iframe.contentWindow;
+        setTimeout(function(){ try{ w.focus(); w.print(); }catch(e){} }, 200);
+      }catch(e){}
+    }
+    document.getElementById('printBtn').addEventListener('click', doPrint);
+    // auto print shortly after load
+    iframe.addEventListener('load', doPrint);
+  })();
+  </script>
+</body>
+</html>
